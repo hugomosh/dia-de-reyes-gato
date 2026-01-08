@@ -359,7 +359,7 @@ async function handleClaimSubmit(e) {
         display.innerHTML = renderStateBoard(claimed);
 
         const message = document.getElementById('success-message');
-        message.innerHTML = `¡Enhorabuena, <strong>${nombre || 'Amigo'}</strong>, tu estado único ha sido reclamado!<br>Espera tu sorpresa adicional y recuerda festejar en compañía de amigos y familia.<br>Ojalá disfrutes rosca(s) de reyes.<br>ID: ${claimed.canonical_id}`;
+        message.innerHTML = `¡Enhorabuena, <strong>${nombre || 'Amigo'}</strong>, tu estado único ha sido reclamado!<br>Espera tu sorpresa adicional y recuerda festejar en compañía de amigos y familia.<br><br>Ojalá disfrutes rosca(s) de reyes.<br>ID: ${claimed.canonical_id}`;
 
         showStep('step-success');
 
@@ -403,8 +403,8 @@ function makeInteractive(displayElement) {
         const centerY = rect.height / 2;
 
         // Calculate rotation based on modal dimensions
-        const rotateX = ((y - centerY) / centerY) * -18; // Max 18deg tilt up/down
-        const rotateY = ((x - centerX) / centerX) * 18;  // Max 18deg tilt left/right
+        const rotateX = ((y - centerY) / centerY) * -60; // Max 60deg tilt up/down
+        const rotateY = ((x - centerX) / centerX) * 60;  // Max 60deg tilt left/right
 
         // Apply 3D rotation to grid only
         gridContent.style.animation = 'none'; // Pause floating while tilting
