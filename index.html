@@ -11,6 +11,11 @@
         text-shadow: 0 0 2px #f3d854;
       }
 
+      p {
+        color: aliceblue;
+        text-shadow: none;
+      }
+
       #all-states {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
@@ -84,6 +89,8 @@
       .text-content {
         text-align: center;
         margin: 20px;
+        max-width: 800px;
+        margin: auto;
       }
 
       .stats {
@@ -115,6 +122,7 @@
         height: 100%;
         background: rgba(13, 22, 53, 0.95);
         backdrop-filter: blur(4px);
+        z-index: 1;
       }
 
       .modal-content {
@@ -123,14 +131,16 @@
         left: 50%;
         transform: translate(-50%, -50%);
         background: #1a2540;
-        border: 2px solid #f3d854;
+        border: 0px solid #f3d854;
         border-radius: 16px;
-        padding: 40px;
+        padding: 40px 40px 60px 40px;
         max-width: 800px;
         width: 90%;
         max-height: 90vh;
         overflow-y: auto;
-        box-shadow: 0 0 30px rgba(243, 216, 84, 0.3);
+        overflow-x: hidden;
+        box-shadow: 0 0 7px rgba(243, 216, 84, 0.3);
+        z-index: 2;
       }
 
       .modal-step {
@@ -344,7 +354,7 @@
         width: 100%;
         padding: 12px;
         background: #0d1635;
-        border: 2px solid #f3d854;
+        border: 1px solid #f3d854;
         border-radius: 8px;
         color: #f3d854;
         font-family: 'Source Code Pro', monospace;
@@ -489,7 +499,7 @@
 
       #selected-state-display {
         background: #0d1635;
-        border: 2px solid #f3d854;
+        border: 1px solid #f3d854;
         border-radius: 12px;
         padding: 20px;
         margin: 20px 0;
@@ -577,7 +587,15 @@
     <div class="container">
       <div class="text-content">
         <h1>Tres reyes magos, tres regalos.</h1>
-        <p>¿Qué tan cerca o lejos estas en tu viaje?</p>
+        <p>En este día de reyes quiero regalar un poco de mis gustos a mi familia y amigos.</p>
+        <p>Aquí están todos los estados posibles del juego del gato. Son <bold>765</bold> y voy a regalar uno a cada persona que conozco (y que se deje ;] ).</p>
+        <p>Me parece que el juego y este ejercicio son una forma de conectar con personas que ocupan un lugar en mis memorias y en mi vida. Una forma de hacer latir esos enlaces. Esto es una forma de exponerme, de ser vulnerable pero real. Ya saben como los reyes magos.</p>
+        <h2>¿Qué tan cerca o lejos estás en tu viaje?</h2>
+        <p>El juego del tic tac toe me recuerda a las personas pues algunas suceden muy temprano en nuestras vidas. Como los primeros turnos. Otras llegan después, otras regresan, una cruz o dona en la esquina la comparten muchas y grandes posiciones del tablero. Y algunas han concluido; pero aquí seguimos jugando.</p>
+        <p>Explora los tableros y descubre cuál es tu estado. Podrás escoger entre tres opciones.</p>
+        <p>¡Feliz día de reyes!</p>
+        <p>Con ♥ Hugo</p>
+        
         <p id="stats-text" class="stats"></p>
         <button id="claim-button">Descubre tu propio estado</button>
     </div>
@@ -618,6 +636,8 @@
         <!-- Paso 2: Formulario de email -->
         <div id="step-email" class="modal-step">
           <h2>Reclama tu estado único</h2>
+         
+          <p>Después de un rato les daré una pequeña actualización. Una sorpresa más.</p>
           <div id="selected-state-display"></div>
 
           <form id="claim-form">
@@ -637,7 +657,7 @@
             </div>
             <button type="submit" class="claim-submit">Reclamar mi regalo</button>
           </form>
-          <p class="form-note">Tu email solo se usa para identificar tu estado único.</p>
+          <p class="form-note">Los datos garantizan tu estado único y me ayudan a crear mi libreta personal para estar en contacto.</p>
         </div>
 
         <!-- Paso 3: Éxito -->

@@ -153,8 +153,7 @@ function updateSlotContent(slotElement, state) {
     slotElement.innerHTML = `
         <div class="state-board">${boardHtml}</div>
         <div class="state-info">
-            Turno ${turnCount}/9<br>
-            Rareza: ${rareza}
+            Turno ${turnCount}/9
         </div>
     `;
 }
@@ -402,13 +401,19 @@ function init() {
 
     // Setup modal event listeners
     document.getElementById('claim-button').addEventListener('click', openClaimModal);
-    document.getElementById('demo-button').addEventListener('click', openDemoMode);
     document.getElementById('modal-done').addEventListener('click', closeModal);
     document.getElementById('retry-button').addEventListener('click', openClaimModal);
     document.getElementById('claim-form').addEventListener('submit', handleClaimSubmit);
 
-    // Close modal on backdrop click
-    document.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+    // Close modal on backdrop click (with touch support for mobile)
+    const backdrop = document.querySelector('.modal-backdrop');
+    backdrop.addEventListener('click', closeModal);
+    backdrop.addEventListener('touchend', (e) => {
+        // Only close if touch ended on backdrop itself, not bubbled from content
+        if (e.target === backdrop) {
+            closeModal();
+        }
+    }, { passive: true });
 }
 
 // Start when DOM is ready
