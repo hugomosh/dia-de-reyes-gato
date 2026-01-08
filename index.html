@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>El gato y los reyes magos</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>👑</text></svg>" />
     <style>
       body {
         font-family: 'Source Code Pro', monospace;
@@ -618,7 +619,6 @@
         <p>Explora los tableros y descubre cuál es tu estado. Podrás escoger entre tres opciones.</p>
         <p><em>Los estados aparecen en gris hasta que son reclamados. Cuando alguien reclama su estado, este se ilumina y cobra vida en el tablero.</em></p>
         <p>¡Feliz día de reyes!</p>
-        <p>Con ♥ Hugo</p>
 
         <p id="stats-text" class="stats"></p>
         <button id="claim-button">Descubre tu propio estado</button>
@@ -626,6 +626,7 @@
 
       <div id="all-states"></div>
       <div id="individual"></div>
+
     </div>
 
     <!-- Modal para reclamar estado -->
@@ -715,7 +716,9 @@
         </div>
       </div>
     </div>
-
+    <footer>
+          <p>Con ♥ Hugo, with the help of 🤖.</p>
+     </footer>
     <script type="module" src="/src/main_ascii.js"></script>
   </body>
 </html>
