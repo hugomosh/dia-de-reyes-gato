@@ -90,14 +90,14 @@ async function loadStats() {
 async function loadClaimedStates() {
     try {
         claimedStateIds = await getClaimedStateIds();
+        console.log({claimedStateIds});
 
         // Update all state elements with claimed/unclaimed classes
         const stateElements = document.querySelectorAll('.state');
         stateElements.forEach(element => {
             // Get state ID from the element's classes or data attributes
             // The state ID should match what we generated
-            const stateId = parseInt(element.dataset.stateId);
-
+            const stateId = element.dataset.stateId;
             if (stateId && claimedStateIds.has(stateId)) {
                 element.classList.remove('unclaimed');
                 element.classList.add('claimed');
