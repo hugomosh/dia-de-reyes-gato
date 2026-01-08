@@ -36,6 +36,29 @@
         white-space: pre;
         align-items: center;
         justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      /* Unclaimed states - gray and dimmed */
+      .state.unclaimed {
+        opacity: 0.3;
+        filter: grayscale(100%);
+      }
+
+      /* Claimed states - bright and colorful */
+      .state.claimed {
+        opacity: 1;
+        filter: grayscale(0%);
+        animation: glow-pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes glow-pulse {
+        0%, 100% {
+          filter: brightness(1);
+        }
+        50% {
+          filter: brightness(1.2);
+        }
       }
 
       .state-terminal .grid {
@@ -593,9 +616,10 @@
         <h2>¿Qué tan cerca o lejos estás en tu viaje?</h2>
         <p>El juego del tic tac toe me recuerda a las personas pues algunas suceden muy temprano en nuestras vidas. Como los primeros turnos. Otras llegan después, otras regresan, una cruz o dona en la esquina la comparten muchas y grandes posiciones del tablero. Y algunas han concluido; pero aquí seguimos jugando.</p>
         <p>Explora los tableros y descubre cuál es tu estado. Podrás escoger entre tres opciones.</p>
+        <p><em>Los estados aparecen en gris hasta que son reclamados. Cuando alguien reclama su estado, este se ilumina y cobra vida en el tablero.</em></p>
         <p>¡Feliz día de reyes!</p>
         <p>Con ♥ Hugo</p>
-        
+
         <p id="stats-text" class="stats"></p>
         <button id="claim-button">Descubre tu propio estado</button>
     </div>
@@ -684,7 +708,7 @@
 
         <!-- Error state -->
         <div id="step-error" class="modal-step">
-          <div class="error-animation">❌</div>
+          <div class="error-animation">X</div>
           <h2>Algo salió mal</h2>
           <p id="error-message"></p>
           <button class="retry-button" id="retry-button">Intentar de nuevo</button>

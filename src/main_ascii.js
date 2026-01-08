@@ -1,9 +1,10 @@
 import { StateGenerator } from './core/StateGenerator.js';
-import { getRandomStates, claimState, getClaimStats } from './services/supabase.js';
+import { getRandomStates, claimState, getClaimStats, getClaimedStateIds } from './services/supabase.js';
 
 // Global state
 let availableStates = [];
 let selectedState = null;
+let claimedStateIds = new Set();
 
 function renderStateBoard(state) {
     // Create ASCII board
@@ -59,6 +60,17 @@ function renderStateElement(state) {
     stateElement.classList.add((state.is_terminal || state.isTerminal) ? 'state-terminal' : 'state-nonterminal');
     (state.has_winner || state.hasWinner) ? stateElement.classList.add('state-winner') : stateElement.classList.add('state-nowinner');
 
+    // Store state ID for later reference
+    const stateId = state.id || state.canonical_id;
+    stateElement.dataset.stateId = stateId;
+
+    // Add claimed/unclaimed class
+    if (claimedStateIds.has(stateId)) {
+        stateElement.classList.add('claimed');
+    } else {
+        stateElement.classList.add('unclaimed');
+    }
+
     stateElement.innerHTML = renderStateBoard(state);
     return stateElement;
 }
@@ -72,6 +84,27 @@ async function loadStats() {
         }
     } catch (error) {
         console.error('Error loading stats:', error);
+    }
+}
+
+async function loadClaimedStates() {
+    try {
+        claimedStateIds = await getClaimedStateIds();
+
+        // Update all state elements with claimed/unclaimed classes
+        const stateElements = document.querySelectorAll('.state');
+        stateElements.forEach(element => {
+            // Get state ID from the element's classes or data attributes
+            // The state ID should match what we generated
+            const stateId = parseInt(element.dataset.stateId);
+
+            if (stateId && claimedStateIds.has(stateId)) {
+                element.classList.remove('unclaimed');
+                element.classList.add('claimed');
+            }
+        });
+    } catch (error) {
+        console.error('Error loading claimed states:', error);
     }
 }
 
@@ -293,7 +326,7 @@ async function handleClaimSubmit(e) {
         display.innerHTML = renderStateBoard(claimed);
 
         const message = document.getElementById('success-message');
-        message.innerHTML = `<strong>${nombre || 'Amigo'}</strong>, tu estado único ha sido reclamado.<br>ID: ${claimed.canonical_id}`;
+        message.innerHTML = `¡Enhorabuena! <strong>${nombre || 'Amigo'}</strong>, tu estado único ha sido reclamado.<br>Espera tu sorpresa adicional y recuerda festejar y ojalaá disfrutes rosca(s) de reyes.<br>ID: ${claimed.canonical_id}`;
 
         showStep('step-success');
 
@@ -399,6 +432,9 @@ function init() {
     // Load stats
     loadStats();
 
+    // Load claimed states and update display
+    loadClaimedStates();
+
     // Setup modal event listeners
     document.getElementById('claim-button').addEventListener('click', openClaimModal);
     document.getElementById('modal-done').addEventListener('click', closeModal);
@@ -409,11 +445,9 @@ function init() {
     const backdrop = document.querySelector('.modal-backdrop');
     backdrop.addEventListener('click', closeModal);
     backdrop.addEventListener('touchend', (e) => {
-        // Only close if touch ended on backdrop itself, not bubbled from content
-        if (e.target === backdrop) {
-            closeModal();
-        }
-    }, { passive: true });
+        e.preventDefault();
+        closeModal();
+    });
 }
 
 // Start when DOM is ready

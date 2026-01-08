@@ -71,3 +71,20 @@ export async function getClaimStats() {
 
   return data[0];
 }
+
+/**
+ * Get all claimed state canonical IDs
+ * @returns {Promise<Set<string>>} Set of claimed canonical IDs
+ */
+export async function getClaimedStateIds() {
+  const { data, error } = await supabase
+    .from('claims')
+    .select('canonical_id');
+
+  if (error) {
+    console.error('Error getting claimed states:', error);
+    throw error;
+  }
+
+  return new Set(data.map(state => state.canonical_id));
+}
