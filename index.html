@@ -53,6 +53,31 @@
         animation: glow-pulse 2s ease-in-out infinite;
       }
 
+      /* Newly claimed state - special reveal animation */
+      .state.just-claimed {
+        animation: claim-reveal 2s ease-out forwards, glow-pulse 2s ease-in-out infinite 2s;
+      }
+
+      @keyframes claim-reveal {
+        0% {
+          opacity: 0.3;
+          filter: grayscale(100%);
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          filter: grayscale(0%);
+          transform: scale(4);
+          box-shadow: 0 0 30px rgba(243, 216, 84, 0.8);
+        }
+        100% {
+          opacity: 1;
+          filter: grayscale(0%);
+          transform: scale(1);
+          box-shadow: none;
+        }
+      }
+
       @keyframes glow-pulse {
         0%, 100% {
           filter: brightness(1);

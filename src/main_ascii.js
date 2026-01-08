@@ -5,6 +5,7 @@ import { getRandomStates, claimState, getClaimStats, getClaimedStateIds } from '
 let availableStates = [];
 let selectedState = null;
 let claimedStateIds = new Set();
+let justClaimedStateId = null;
 
 function renderStateBoard(state) {
     // Create ASCII board
@@ -280,8 +281,37 @@ function showError(message) {
 
 function closeModal() {
     document.getElementById('claim-modal').classList.remove('active');
+
+    // Animate the claimed state on the board if one was just claimed
+    if (justClaimedStateId) {
+        animateClaimedState(justClaimedStateId);
+        justClaimedStateId = null;
+    }
+
     selectedState = null;
     availableStates = [];
+}
+
+function animateClaimedState(stateId) {
+    // Find the state element on the board
+    const stateElement = document.querySelector(`.state[data-state-id="${stateId}"]`);
+
+    if (stateElement) {
+        // Remove unclaimed class and add claimed with special animation
+        stateElement.classList.remove('unclaimed');
+        stateElement.classList.add('claimed', 'just-claimed');
+
+        // Scroll the state into view
+        stateElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+        // Remove the just-claimed class after animation completes (2s)
+        setTimeout(() => {
+            stateElement.classList.remove('just-claimed');
+        }, 2000);
+    }
 }
 
 async function openDemoMode() {
@@ -321,6 +351,9 @@ async function handleClaimSubmit(e) {
     try {
         const claimed = await claimState(selectedState.canonical_id, email, nombre);
 
+        // Store the claimed state ID for animation when modal closes
+        justClaimedStateId = claimed.canonical_id;
+
         // Show success
         const display = document.getElementById('claimed-state-display');
         display.innerHTML = renderStateBoard(claimed);
@@ -333,8 +366,9 @@ async function handleClaimSubmit(e) {
         // Make the board interactive (draggable)
         makeInteractive(display);
 
-        // Reload stats
+        // Reload stats and update claimed states
         await loadStats();
+        claimedStateIds.add(claimed.canonical_id);
 
     } catch (error) {
         console.error('Error claiming state:', error);
@@ -369,8 +403,8 @@ function makeInteractive(displayElement) {
         const centerY = rect.height / 2;
 
         // Calculate rotation based on modal dimensions
-        const rotateX = ((y - centerY) / centerY) * -12; // Max 12deg tilt up/down
-        const rotateY = ((x - centerX) / centerX) * 12;  // Max 12deg tilt left/right
+        const rotateX = ((y - centerY) / centerY) * -18; // Max 18deg tilt up/down
+        const rotateY = ((x - centerX) / centerX) * 18;  // Max 18deg tilt left/right
 
         // Apply 3D rotation to grid only
         gridContent.style.animation = 'none'; // Pause floating while tilting
