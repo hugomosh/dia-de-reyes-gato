@@ -326,7 +326,7 @@ async function handleClaimSubmit(e) {
         display.innerHTML = renderStateBoard(claimed);
 
         const message = document.getElementById('success-message');
-        message.innerHTML = `¡Enhorabuena! <strong>${nombre || 'Amigo'}</strong>, tu estado único ha sido reclamado.<br>Espera tu sorpresa adicional y recuerda festejar y ojalaá disfrutes rosca(s) de reyes.<br>ID: ${claimed.canonical_id}`;
+        message.innerHTML = `¡Enhorabuena, <strong>${nombre || 'Amigo'}</strong>, tu estado único ha sido reclamado!<br>Espera tu sorpresa adicional y recuerda festejar en compañía de amigos y familia.<br>Ojalá disfrutes rosca(s) de reyes.<br>ID: ${claimed.canonical_id}`;
 
         showStep('step-success');
 
