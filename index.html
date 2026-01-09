@@ -85,10 +85,20 @@
         }
       }
 
+      .grid {
+        white-space: pre;
+      }
+
       .state-terminal .grid {
         text-shadow:
           0 0 5px #f3d854,
           0 0 10px #f3d854;
+      }
+
+      .mark-x,
+      .mark-o,
+      [class*="mark-"] {
+        white-space: pre;
       }
 
       .mark-x {
@@ -574,8 +584,13 @@
         margin: 20px 0;
         font-family: 'Source Code Pro', monospace;
         text-align: center;
-        white-space: pre;
         overflow-x: auto;
+      }
+
+      #selected-state-display > * {
+        display: inline-block;
+        white-space: pre;
+        text-align: left;
       }
 
       #claimed-state-display {
@@ -584,17 +599,23 @@
         margin: 30px auto;
         font-family: 'Source Code Pro', monospace;
         text-align: center;
-        white-space: pre;
         font-size: 24px;
         line-height: 1.4;
         max-width: 400px;
         user-select: none;
       }
 
+      #claimed-state-display > * {
+        display: inline-block;
+        white-space: pre;
+        text-align: left;
+      }
+
       #claimed-state-display .grid-content {
         display: inline-block;
         transform-style: preserve-3d;
         transition: transform 0.1s ease-out;
+        white-space: pre;
       }
 
       /* Floating animation for ASCII grid only */
