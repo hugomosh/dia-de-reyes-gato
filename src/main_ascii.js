@@ -91,7 +91,6 @@ async function loadStats() {
 async function loadClaimedStates() {
     try {
         claimedStateIds = await getClaimedStateIds();
-        console.log({claimedStateIds});
 
         // Update all state elements with claimed/unclaimed classes
         const stateElements = document.querySelectorAll('.state');
@@ -422,8 +421,8 @@ function makeInteractive(displayElement) {
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
 
-            const rotateX = ((y - centerY) / centerY) * -12;
-            const rotateY = ((x - centerX) / centerX) * 12;
+            const rotateX = ((y - centerY) / centerY) * -60;
+            const rotateY = ((x - centerX) / centerX) * 60;
 
             gridContent.style.animation = 'none';
             gridContent.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
@@ -478,10 +477,10 @@ function init() {
     // Close modal on backdrop click (with touch support for mobile)
     const backdrop = document.querySelector('.modal-backdrop');
     backdrop.addEventListener('click', closeModal);
-    backdrop.addEventListener('touchend', (e) => {
+ /*    backdrop.addEventListener('touchend', (e) => {
         e.preventDefault();
         closeModal();
-    });
+    }); */
 }
 
 // Start when DOM is ready
