@@ -23,10 +23,36 @@ AS $$
 $$;
 
 -- ============================================
+-- 3. Fix get_claim_stats to use SECURITY DEFINER
+-- ============================================
+
+-- The existing function needs SECURITY DEFINER so it can still access claims table
+DROP FUNCTION IF EXISTS get_claim_stats();
+
+CREATE OR REPLACE FUNCTION get_claim_stats()
+RETURNS TABLE(
+  total_states BIGINT,
+  claimed_states BIGINT,
+  available_states BIGINT
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
+  SELECT
+    COUNT(*)::BIGINT as total_states,
+    COUNT(c.id)::BIGINT as claimed_states,
+    (COUNT(*) - COUNT(c.id))::BIGINT as available_states
+  FROM tic_tac_toe_states s
+  LEFT JOIN claims c ON s.canonical_id = c.canonical_id;
+$$;
+
+-- ============================================
 -- Done!
 -- ============================================
 -- Run this in Supabase SQL Editor to fix the security issue
 -- After running this:
 -- 1. Users can no longer SELECT from claims table directly
 -- 2. They can only call get_claimed_canonical_ids() which returns ONLY canonical_ids
--- 3. Emails and names are now protected
+-- 3. get_claim_stats() still works because it uses SECURITY DEFINER
+-- 4. Emails and names are now protected
