@@ -31,8 +31,8 @@ function renderStateBoard(state) {
         });
     }
 
-    // Build HTML string
-    let html = '';
+    // Build HTML string with translate="no" to prevent browser translation from breaking spacing
+    let html = '<span translate="no">';
     for (let row = 0; row < 3; row++) {
         if (row > 0) {
             html += '<span class="grid">---+---+---</span><br>';
@@ -50,6 +50,7 @@ function renderStateBoard(state) {
         }
         html += '<br>';
     }
+    html += '</span>';
 
     return html;
 }
