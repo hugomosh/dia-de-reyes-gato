@@ -77,9 +77,9 @@ export async function getClaimStats() {
  * @returns {Promise<Set<string>>} Set of claimed canonical IDs
  */
 export async function getClaimedStateIds() {
-  const { data, error } = await supabase
-    .from('claims')
-    .select('canonical_id');
+
+
+  const { data, error } = await supabase.rpc('get_claimed_canonical_ids');
 
   if (error) {
     console.error('Error getting claimed states:', error);

@@ -38,8 +38,10 @@ export class StateGenerator {
     }
 
     console.timeEnd('generateAll');
-    console.log(`✅ Generated ${this.allStates.length} states`);
-    console.log(`📊 ${this.canonicalMap.size} canonical forms`);
+    console.log(`✅ Generated ${this.allStates.length} states, withouth rules (${this.canonicalMap.size} canonical forms)`);
+    console.log(`> ${this.allStates.filter(s => s.isValid).length} legal moves`);
+    console.log(`> ${this.allStates.filter(s => s.isValidFirstPlayerX).length} legal moves (X first)`);
+    console.log(`> ${this.allStates.filter(s => s.isValidFirstPlayerX && s.canonical === s.id).length} canonical legal  (x first)`);
 
     return this.allStates;
   }

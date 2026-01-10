@@ -447,7 +447,6 @@ function init() {
     canonicalStates.sort((a, b) => a.turnCount - b.turnCount || a.id - b.id);
 
     const allElement = document.getElementById("all-states");
-    console.log({ allElement, canonicalStates });
 
     for (let i = 0; i < canonicalStates.length; i++) {
         const state = canonicalStates[i];
