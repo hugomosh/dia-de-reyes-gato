@@ -153,7 +153,7 @@ function showError(message) {
     loadingOverlay.innerHTML = `
         <div class="loading-orbital">
             <div class="error-message">${message}</div>
-            <a href="/" class="back-link" style="margin-top: 20px;">← Volver al inicio</a>
+            <a href="./" class="back-link" style="margin-top: 20px;">← Volver al inicio</a>
         </div>
     `;
 }

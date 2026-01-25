@@ -64,7 +64,7 @@ function handleStateClick(event) {
     // Only navigate if this state is claimed
     if (stateElement.classList.contains('claimed')) {
         console.log('Navigating to state:', stateId);
-        window.location.href = `/state.html?id=${stateId}`;
+        window.location.href = `./state.html?id=${stateId}`;
     }
 }
 
