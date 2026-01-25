@@ -49,6 +49,14 @@
         opacity: 1;
         filter: grayscale(0%);
         animation: glow-pulse 2s ease-in-out infinite;
+        cursor: pointer;
+      }
+
+      /* Hover effect for clickable claimed states */
+      .state.claimed:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(243, 216, 84, 0.5);
+        z-index: 10;
       }
 
       /* Newly claimed state - special reveal animation */

@@ -55,6 +55,19 @@ function renderStateBoard(state) {
     return html;
 }
 
+function handleStateClick(event) {
+    const stateElement = event.currentTarget;
+    const stateId = stateElement.dataset.stateId;
+
+    console.log('State clicked:', stateId, 'Is claimed:', stateElement.classList.contains('claimed'));
+
+    // Only navigate if this state is claimed
+    if (stateElement.classList.contains('claimed')) {
+        console.log('Navigating to state:', stateId);
+        window.location.href = `/state.html?id=${stateId}`;
+    }
+}
+
 function renderStateElement(state) {
     const stateElement = document.createElement("div");
     stateElement.className = "state";
@@ -72,6 +85,9 @@ function renderStateElement(state) {
     } else {
         stateElement.classList.add('unclaimed');
     }
+
+    // Add click handler to all states - will only navigate if claimed
+    stateElement.addEventListener('click', handleStateClick);
 
     stateElement.innerHTML = renderStateBoard(state);
     return stateElement;

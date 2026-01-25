@@ -88,3 +88,23 @@ export async function getClaimedStateIds() {
 
   return new Set(data.map(state => state.canonical_id));
 }
+
+/**
+ * Get a specific state by its canonical ID
+ * @param {string} canonicalId - The canonical ID of the state
+ * @returns {Promise<Object>} The state data with claim information if claimed
+ */
+export async function getStateById(canonicalId) {
+  const { data, error } = await supabase
+    .from('tic_tac_toe_states')
+    .select('*')
+    .eq('canonical_id', canonicalId)
+    .single();
+
+  if (error) {
+    console.error('Error getting state by ID:', error);
+    throw error;
+  }
+  
+  return data;
+}
