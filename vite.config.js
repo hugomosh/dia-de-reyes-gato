@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         state: resolve(__dirname, 'state.html'),
+        cosmos: resolve(__dirname, 'cosmos.html'),
       },
       output: {
         manualChunks: {

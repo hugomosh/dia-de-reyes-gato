@@ -1,0 +1,813 @@
+<title>Cosmos del Gato</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Literata:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#ece1c6; --ink:#2c2444; --ink-soft:#5b5270; --accent:#a9762f;
+    --panel-bg:rgba(236,225,198,.92); --panel-border:rgba(44,36,68,.24);
+    --font-display:'Fraunces', Georgia, serif; --font-body:'Literata', Georgia, serif; --font-mono:'Source Code Pro', monospace;
+    --star-color:#a9762f; color-scheme: light;
+  }
+  html[data-look="reyes"]{
+    --paper:#0d1635; --ink:#f3d854; --ink-soft:#9db3d6; --accent:#f3d854;
+    --panel-bg:rgba(13,22,53,.9); --panel-border:rgba(243,216,84,.3);
+    --font-display:'Source Code Pro', monospace; --font-body:'Source Code Pro', monospace;
+    --star-color:#f3d854; color-scheme: dark;
+  }
+  html[data-look="cosmos"]{
+    --paper:#12102a; --ink:#d9d3f0; --ink-soft:#9089b8; --accent:#e3c07a;
+    --panel-bg:rgba(18,16,42,.9); --panel-border:rgba(217,211,240,.26);
+    --star-color:#cbb7e8; color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); overflow:hidden; transition:background .5s ease, color .5s ease; }
+
+  #world{ position:fixed; inset:0; cursor:grab; touch-action:none; }
+  #world.dragging{ cursor:grabbing; }
+  #canvasWrap{ position:absolute; top:0; left:0; transform-origin:0 0; will-change:transform; }
+  #poster{ display:block; }
+
+  .grain{
+    position:fixed; inset:0; pointer-events:none; opacity:0; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    transition:opacity .5s ease;
+  }
+  html[data-look="codice"] .grain{ opacity:.05; }
+
+  .stars{ position:fixed; inset:0; pointer-events:none; opacity:0; transition:opacity .6s ease; }
+  html[data-look="reyes"] .stars, html[data-look="cosmos"] .stars{ opacity:1; }
+  .stars i{ position:absolute; width:3px; height:3px; background:var(--star-color); border-radius:50%; box-shadow:0 0 8px var(--star-color); animation:twinkle 2.6s ease-in-out infinite; }
+  @keyframes twinkle{ 0%,100%{opacity:.15; transform:scale(1);} 50%{opacity:.8; transform:scale(1.4);} }
+
+  header.top{
+    position:fixed; top:0; left:0; right:0; z-index:20;
+    padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 0;
+    display:flex; align-items:center; justify-content:space-between;
+    pointer-events:none;
+  }
+  .brand{
+    pointer-events:none; font-family:var(--font-display); font-weight:600;
+    font-size:15px; letter-spacing:.02em; color:var(--ink); opacity:.8;
+  }
+  html[data-look="reyes"] .brand{ text-shadow:0 0 6px rgba(243,216,84,.4); }
+  .iconRow{ pointer-events:auto; display:flex; gap:8px; }
+  .iconBtn{
+    width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--panel-border); background:var(--panel-bg); color:var(--ink-soft);
+    font-family:var(--font-mono); font-size:14px; cursor:pointer; backdrop-filter:blur(6px); transition:.2s;
+  }
+  .iconBtn:hover{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .iconBtn svg{ width:16px; height:16px; }
+
+  .mainControls{
+    position:fixed; top:calc(env(safe-area-inset-top,0px) + 58px); left:20px; z-index:15;
+    display:flex; gap:10px 16px; flex-wrap:wrap; pointer-events:none;
+  }
+  .mainControls .ctrlrow{ pointer-events:auto; }
+
+  .swatch{
+    width:12px; height:12px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:-2px;
+    box-shadow:0 0 0 1px rgba(0,0,0,.15);
+  }
+
+  h1{ font-family:var(--font-display); font-weight:600; font-size:22px; margin:0 0 10px; letter-spacing:.01em; text-wrap:balance; color:var(--ink); }
+  .sub{ margin:0 0 10px; font-size:13px; line-height:1.6; color:var(--ink-soft); }
+  .sub a{ color:var(--accent); }
+  .statline{ margin:0 0 4px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.03em; color:var(--ink-soft); opacity:.85; }
+  .statline a{ color:inherit; }
+  #explainText{ font-size:12.5px; }
+  #explainText b{ color:var(--ink); font-weight:600; }
+
+  .modalBackdrop{
+    position:fixed; inset:0; z-index:60; background:rgba(20,16,10,.45);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .modalBackdrop.open{ opacity:1; pointer-events:auto; }
+  .modalCard{
+    position:relative; width:100%; max-width:560px; max-height:82vh; overflow-y:auto;
+    background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:16px;
+    padding:28px 26px 24px; backdrop-filter:blur(10px);
+    transform:translateY(14px) scale(.98); transition:transform .25s cubic-bezier(.2,.8,.3,1);
+  }
+  .modalBackdrop.open .modalCard{ transform:translateY(0) scale(1); }
+  .modalCard .close{ position:absolute; top:14px; right:16px; background:none; border:none; color:var(--ink-soft); font-size:20px; cursor:pointer; line-height:1; }
+
+  .settingsPanel{
+    position:fixed; top:calc(env(safe-area-inset-top,0px) + 60px); right:20px; z-index:40;
+    background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:14px; padding:14px;
+    backdrop-filter:blur(8px); display:flex; flex-direction:column; align-items:flex-end; gap:8px;
+    transform:translateY(-10px) scale(.97); opacity:0; pointer-events:none; transition:transform .2s ease, opacity .2s ease;
+  }
+  .settingsPanel.open{ transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
+  .ctrlrow{ display:flex; align-items:center; gap:8px; }
+  .row-label{ font-family:var(--font-mono); font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); }
+  .pillgroup{
+    display:flex; gap:4px; background:var(--panel-bg); border:1px solid var(--panel-border);
+    border-radius:999px; padding:3px; backdrop-filter:blur(6px);
+  }
+  .pillgroup button{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.03em; text-transform:uppercase;
+    border:none; background:transparent; color:var(--ink-soft); padding:6px 11px; border-radius:999px;
+    cursor:pointer; transition:.2s;
+  }
+  .pillgroup button.active{ background:var(--ink); color:var(--paper); }
+  .pillgroup button:hover{ color:var(--ink); }
+
+  .toggle{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.03em; text-transform:uppercase;
+    border:1px solid var(--panel-border); background:var(--panel-bg); color:var(--ink-soft);
+    padding:6px 12px; border-radius:999px; cursor:pointer; backdrop-filter:blur(6px);
+  }
+  .toggle:hover{ color:var(--ink); }
+
+  #panel{
+    position:fixed; right:16px; bottom:calc(env(safe-area-inset-bottom,0px) + 16px);
+    width:min(260px, calc(100vw - 32px));
+    background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:14px; padding:16px;
+    backdrop-filter:blur(8px);
+    transform:translateY(calc(100% + 24px)); opacity:0;
+    transition:transform .35s cubic-bezier(.2,.8,.3,1), opacity .3s ease;
+  }
+  #panel.open{ transform:translateY(0); opacity:1; }
+  #panel canvas{ display:block; margin:0 auto 10px; width:112px; height:112px; }
+  #panel .meta{ font-family:var(--font-mono); font-size:11px; line-height:1.8; color:var(--ink-soft); }
+  #panel .meta b{ color:var(--ink); font-weight:600; }
+  #panel .note{ margin-top:8px; font-size:10.5px; line-height:1.5; color:var(--ink-soft); font-style:italic; }
+  #panel .status{
+    display:inline-block; font-family:var(--font-mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+    padding:2px 8px; border-radius:999px; margin-bottom:8px; border:1px solid var(--panel-border); color:var(--ink);
+  }
+  #panel .idline{ margin-top:8px; font-size:10.5px; color:var(--ink-soft); font-family:var(--font-mono); }
+  #panel .close{ position:absolute; top:10px; right:12px; background:none; border:none; color:var(--ink-soft); font-size:16px; cursor:pointer; line-height:1; }
+
+  @media (max-width:640px){
+    .settingsPanel{ left:20px; right:20px; align-items:stretch; }
+    .ctrlrow{ flex-wrap:wrap; }
+    .modalCard{ padding:22px 18px 20px; }
+    .mainControls{ top:calc(env(safe-area-inset-top,0px) + 56px); left:16px; right:16px; }
+  }
+
+  ::selection{ background:var(--accent); color:var(--paper); }
+</style>
+
+<div id="world"><div id="canvasWrap"><canvas id="poster"></canvas></div></div>
+<div class="grain"></div>
+<div class="stars" id="stars"></div>
+
+<header class="top">
+  <div class="brand">Cosmos del Gato</div>
+  <div class="iconRow">
+    <button class="iconBtn" id="fitButton" aria-label="Centrar" title="Centrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 1-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg>
+    </button>
+    <button class="iconBtn" id="infoBtn" aria-label="Información" title="Información">i</button>
+    <button class="iconBtn" id="settingsBtn" aria-label="Ajustes" title="Ajustes">⚙</button>
+  </div>
+</header>
+
+<div class="mainControls" id="mainControls">
+  <div class="ctrlrow"><span class="row-label">Orden</span>
+    <div class="pillgroup" id="layoutGroup">
+      <button data-value="grouped" class="active">Por turno</button>
+      <button data-value="flat">Libre</button>
+    </div>
+  </div>
+  <div class="ctrlrow"><span class="row-label">Empieza</span>
+    <div class="pillgroup" id="starterGroup">
+      <button data-value="x" class="active">X</button>
+      <button data-value="o">O</button>
+      <button data-value="both">Ambos</button>
+    </div>
+  </div>
+</div>
+
+<div class="settingsPanel" id="settingsPanel">
+  <div class="ctrlrow"><span class="row-label">Estilo</span>
+    <div class="pillgroup" id="lookGroup">
+      <button data-value="codice" class="active">Códice</button>
+      <button data-value="reyes">Reyes</button>
+      <button data-value="cosmos">Cosmos</button>
+    </div>
+  </div>
+  <div class="ctrlrow"><span class="row-label">Trazo</span>
+    <div class="pillgroup" id="strokeGroup">
+      <button data-value="hand" class="active">A mano</button>
+      <button data-value="uniform">Uniforme</button>
+    </div>
+  </div>
+  <div class="ctrlrow"><span class="row-label">Color</span>
+    <div class="pillgroup" id="colorGroup">
+      <button data-value="off">Ninguno</button>
+      <button data-value="all" class="active">Todo</button>
+      <button data-value="last">Último</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalBackdrop" id="infoBackdrop">
+  <div class="modalCard">
+    <button class="close" id="infoClose">×</button>
+    <h1>Cosmos del Gato</h1>
+    <p class="sub">Todos los estados únicos del juego del gato, o tic-tac-toe, de <a href="https://github.com/hugomosh/dia-de-reyes-gato">Día de Reyes: Gato</a>, dibujados a mano — pluma sobre papel.</p>
+    <p class="sub">Arrastra para moverte, rueda o pellizca para acercar, toca un tablero para leerlo. Arriba a la izquierda cambias el orden y quién empieza; el ícono de ajustes (⚙) cambia el estilo, el trazo y el color; el ícono de esquinas centra el tablero.</p>
+    <p class="sub" id="explainText"></p>
+    <p class="statline" id="statLine"></p>
+    <p class="statline" id="oeisLine">Conteos por jugada — <a href="https://oeis.org/A390650">OEIS A390650</a> (todas las posiciones) y <a href="https://oeis.org/A008907">A008907</a> (únicas por simetría, un solo jugador empieza).</p>
+  </div>
+</div>
+
+<div id="panel">
+  <button class="close" id="panelClose">×</button>
+  <canvas id="panelBoard" width="220" height="220"></canvas>
+  <div class="status" id="panelStatus">—</div>
+  <div class="meta" id="panelMeta"></div>
+  <div class="note" id="panelNote"></div>
+  <div class="idline">id <span id="panelId"></span></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- 1. Generate the state space under both starting conventions ---------- */
+
+  const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+  function sym_rotate90(c){ return [c[6],c[3],c[0],c[7],c[4],c[1],c[8],c[5],c[2]]; }
+  function sym_rotate180(c){ return [c[8],c[7],c[6],c[5],c[4],c[3],c[2],c[1],c[0]]; }
+  function sym_rotate270(c){ return [c[2],c[5],c[8],c[1],c[4],c[7],c[0],c[3],c[6]]; }
+  function sym_reflH(c){ return [c[6],c[7],c[8],c[3],c[4],c[5],c[0],c[1],c[2]]; }
+  function sym_reflV(c){ return [c[2],c[1],c[0],c[5],c[4],c[3],c[8],c[7],c[6]]; }
+  function sym_reflD(c){ return [c[0],c[3],c[6],c[1],c[4],c[7],c[2],c[5],c[8]]; }
+  function sym_reflAD(c){ return [c[8],c[5],c[2],c[7],c[4],c[1],c[6],c[3],c[0]]; }
+  function allSymmetries(c){ return [c, sym_rotate90(c), sym_rotate180(c), sym_rotate270(c), sym_reflH(c), sym_reflV(c), sym_reflD(c), sym_reflAD(c)]; }
+  function canonicalForm(c){ let min=null; for(const s of allSymmetries(c)){ const str=s.join(''); if(min===null||str<min) min=str; } return min; }
+  function orbitSize(c){ return new Set(allSymmetries(c).map(s=>s.join(''))).size; }
+  function swapVal(v){ return v===0?0:(v===1?2:1); }
+
+  // xStarts=true: X moves first (classic). xStarts=false: O moves first.
+  // Piece marks are always literal (config[i]===1 is always an X on the board) —
+  // only the *legality* of a given arrangement, and who "won last", depends on who started.
+  function analyzeConv(config, xStarts){
+    let winners=[], winLines=[];
+    for(const [a,b,c] of WIN_LINES){
+      if(config[a]!==0 && config[a]===config[b] && config[a]===config[c]){
+        if(!winners.includes(config[a])) winners.push(config[a]);
+        winLines.push([a,b,c]);
+      }
+    }
+    const count0=config.filter(v=>v===0).length, count1=config.filter(v=>v===1).length, count2=config.filter(v=>v===2).length;
+    const first = xStarts?1:2, second = xStarts?2:1;
+    const cFirst = xStarts?count1:count2, cSecond = xStarts?count2:count1;
+    let isValid = true;
+    if(cFirst<cSecond || cFirst>cSecond+1) isValid=false;
+    if(winners.length>1) isValid=false;
+    if(winners.length===1){
+      if(winners[0]===first && cFirst<=cSecond) isValid=false;
+      if(winners[0]===second && cFirst!==cSecond) isValid=false;
+    }
+    const hasWinner = winners.length===1;
+    const isTerminal = isValid && (hasWinner || count0===0);
+    const turnCount = count1+count2;
+    return {config, count0,count1,count2, winners, winLines, hasWinner, isValid, isTerminal, turnCount};
+  }
+
+  function lastMoveCells(config, xStarts, count1, count2){
+    const turnCount = count1+count2;
+    if(turnCount===0) return [];
+    const lastMover = xStarts ? (count1>count2?1:2) : (count2>count1?2:1);
+    const cells=[];
+    for(let i=0;i<9;i++){
+      if(config[i]!==lastMover) continue;
+      const child = config.slice(); child[i]=0;
+      const info = analyzeConv(child, xStarts);
+      if(info.isValid && !info.isTerminal) cells.push(i);
+    }
+    return cells;
+  }
+
+  function buildCanonSet(xStarts){
+    const map = new Map(); // canonical geometric form -> representative state
+    let rawCount = 0;
+    for(let i=0;i<19683;i++){
+      const id = i.toString(3).padStart(9,'0');
+      const config = id.split('').map(Number);
+      const info = analyzeConv(config, xStarts);
+      if(!info.isValid) continue;
+      rawCount++;
+      const canonical = canonicalForm(config);
+      if(map.has(canonical)) continue;
+      map.set(canonical, {
+        id, decimalId:i, config, canonical,
+        turnCount: info.turnCount, winners: info.winners, winLines: info.winLines,
+        hasWinner: info.hasWinner, isTerminal: info.isTerminal,
+        orbitSize: orbitSize(config),
+        lastMoveCells: lastMoveCells(config, xStarts, info.count1, info.count2),
+      });
+    }
+    const arr = Array.from(map.values());
+    arr.sort((a,b)=> a.turnCount-b.turnCount || a.decimalId-b.decimalId);
+    arr.rawCount = rawCount;
+    return arr;
+  }
+
+  const xCanon = buildCanonSet(true);
+  const oCanon = buildCanonSet(false);
+
+  // union: states reachable under either convention, counted once when identical
+  function buildUnion(){
+    const map = new Map();
+    xCanon.forEach(s => map.set(s.id, {
+      id:s.id, config:s.config, canonical:s.canonical, turnCount:s.turnCount,
+      winners:s.winners, winLines:s.winLines, hasWinner:s.hasWinner, isTerminal:s.isTerminal,
+      orbitSize:s.orbitSize, inX:true, inO:false, lastMoveCells:s.lastMoveCells.slice(),
+    }));
+    oCanon.forEach(s => {
+      if(map.has(s.id)){
+        const e = map.get(s.id);
+        e.inO = true;
+        s.lastMoveCells.forEach(c => { if(!e.lastMoveCells.includes(c)) e.lastMoveCells.push(c); });
+      } else {
+        map.set(s.id, {
+          id:s.id, config:s.config, canonical:s.canonical, turnCount:s.turnCount,
+          winners:s.winners, winLines:s.winLines, hasWinner:s.hasWinner, isTerminal:s.isTerminal,
+          orbitSize:s.orbitSize, inX:false, inO:true, lastMoveCells:s.lastMoveCells.slice(),
+        });
+      }
+    });
+    const arr = Array.from(map.values());
+    arr.sort((a,b)=> a.turnCount-b.turnCount || a.id.localeCompare(b.id));
+    return arr;
+  }
+  const bothCanon = buildUnion();
+  xCanon.forEach(s => { s.inX=true; s.inO = bothCanon.find(u=>u.id===s.id)?.inO ?? false; });
+  oCanon.forEach(s => { s.inO=true; s.inX = bothCanon.find(u=>u.id===s.id)?.inX ?? false; });
+
+  function listStats(list){
+    return { n:list.length, win:list.filter(s=>s.hasWinner).length, draw:list.filter(s=>s.isTerminal&&!s.hasWinner).length };
+  }
+
+  /* ---------- 2. Ink-and-paper drawing helpers (pen-plotter wobble, no per-stroke shadows) ---------- */
+
+  function hashStr(str){ let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; }
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed=(seed+0x6D2B79F5)|0;
+      let t=Math.imul(seed^(seed>>>15),1|seed);
+      t=(t+Math.imul(t^(t>>>7),61|t))^t;
+      return ((t^(t>>>14))>>>0)/4294967296;
+    };
+  }
+  function jitteredPoints(x1,y1,x2,y2,rng,amp,segments){
+    const pts=[], dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1, nx=-dy/len, ny=dx/len;
+    for(let i=0;i<=segments;i++){
+      const t=i/segments, wobble=(rng()-0.5)*amp*Math.sin(Math.min(t,1-t)*Math.PI*1.6+0.3);
+      pts.push([x1+dx*t+nx*wobble, y1+dy*t+ny*wobble]);
+    }
+    return pts;
+  }
+  function strokeInk(ctx, x1,y1,x2,y2, seed, o){
+    o=o||{};
+    const amp=o.amp??1.5, passes=o.passes??2, width=o.width??1.4, color=o.color??'#000', alpha=o.alpha??0.9;
+    for(let p=0;p<passes;p++){
+      const rng=mulberry32(seed+p*97+13);
+      const pts=jitteredPoints(x1,y1,x2,y2,rng,amp*(p===0?1:0.55),7);
+      ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+      for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]);
+      ctx.strokeStyle=color; ctx.globalAlpha=alpha*(p===0?1:0.45);
+      ctx.lineWidth=width*(p===0?1:0.7); ctx.lineCap='round'; ctx.lineJoin='round';
+      ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+  function strokeInkCircle(ctx, cx,cy,r, seed, o){
+    o=o||{};
+    const segs=18, amp=o.amp??1.1, rng=mulberry32(seed);
+    ctx.beginPath();
+    for(let i=0;i<=segs;i++){
+      const a=(i/segs)*Math.PI*2, rr=r+(rng()-0.5)*amp;
+      const x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=o.color??'#000'; ctx.globalAlpha=o.alpha??0.9;
+    ctx.lineWidth=o.width??1.4; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.stroke(); ctx.globalAlpha=1;
+  }
+
+  function drawBoardIcon(ctx, ox, oy, size, s, pal, colorMode, strokeMode){
+    const cell=size/3, seed=hashStr(s.canonical), ov=size*0.035, gw=Math.max(0.9,size*0.026);
+    const uniform = strokeMode==='uniform';
+    const A = uniform ? 0 : 1;
+    const P = uniform ? 1 : 2;
+
+    strokeInk(ctx, ox+cell, oy-ov, ox+cell, oy+size+ov, seed+1, {color:pal.ink, width:gw, amp:size*0.02*A, alpha:.8, passes:P});
+    strokeInk(ctx, ox+2*cell, oy-ov, ox+2*cell, oy+size+ov, seed+2, {color:pal.ink, width:gw, amp:size*0.02*A, alpha:.8, passes:P});
+    strokeInk(ctx, ox-ov, oy+cell, ox+size+ov, oy+cell, seed+3, {color:pal.ink, width:gw, amp:size*0.02*A, alpha:.8, passes:P});
+    strokeInk(ctx, ox-ov, oy+2*cell, ox+size+ov, oy+2*cell, seed+4, {color:pal.ink, width:gw, amp:size*0.02*A, alpha:.8, passes:P});
+
+    const mw = Math.max(1, size*0.036);
+    for(let i=0;i<9;i++){
+      const v = s.config[i];
+      if(v===0) continue;
+      let markColor = pal.ink;
+      if(colorMode==='all') markColor = v===1 ? pal.x : pal.o;
+      else if(colorMode==='last' && s.lastMoveCells.includes(i)) markColor = v===1 ? pal.x : pal.o;
+
+      const r=Math.floor(i/3), c=i%3, cx=ox+c*cell+cell/2, cy=oy+r*cell+cell/2, m=cell*0.32;
+      if(v===1){
+        strokeInk(ctx, cx-m,cy-m, cx+m,cy+m, seed+10+i, {color:markColor, width:mw, amp:size*0.018*A, alpha:.95, passes:P});
+        strokeInk(ctx, cx-m,cy+m, cx+m,cy-m, seed+20+i, {color:markColor, width:mw, amp:size*0.018*A, alpha:.95, passes:P});
+      } else {
+        strokeInkCircle(ctx, cx, cy, m*0.92, seed+30+i, {color:markColor, width:mw, amp:(uniform?0.15:size*0.02), alpha:.95});
+      }
+    }
+    if(s.winLines.length){
+      const line=s.winLines[0];
+      const r1=Math.floor(line[0]/3), c1=line[0]%3, r2=Math.floor(line[2]/3), c2=line[2]%3;
+      const x1=ox+c1*cell+cell/2, y1=oy+r1*cell+cell/2, x2=ox+c2*cell+cell/2, y2=oy+r2*cell+cell/2;
+      strokeInk(ctx, x1,y1,x2,y2, seed+99, {color:pal.accent, width:size*0.045, amp:size*0.022*A, alpha:.85, passes:1});
+    }
+  }
+
+  /* ---------- 3. Layouts: grouped-by-turn and a plain flat grid, computed per data set ---------- */
+
+  const CELL=58, GAP=15, HEADER=30, SECTION_GAP=34, MARGIN=40;
+
+  function computeLayouts(list){
+    const layers=[]; for(let t=0;t<=9;t++) layers.push([]);
+    list.forEach(s => layers[s.turnCount].push(s));
+    layers.forEach(layer => layer.sort((a,b)=>{
+      const ga=a.hasWinner?(10+a.winners[0]):(a.isTerminal?9:0);
+      const gb=b.hasWinner?(10+b.winners[0]):(b.isTerminal?9:0);
+      return ga-gb || a.id.localeCompare(b.id);
+    }));
+
+    let gY=MARGIN, gMaxWidth=0;
+    const sectionsG=[];
+    layers.forEach((layer,t)=>{
+      const n=layer.length; if(n===0) return;
+      const cols=Math.max(1, Math.round(Math.sqrt(n*2.4)));
+      const rows=Math.ceil(n/cols);
+      gMaxWidth = Math.max(gMaxWidth, MARGIN*2 + cols*(CELL+GAP)-GAP);
+      sectionsG.push({t, n, y:gY, label:`turno ${t} · ${n} estado${n===1?'':'s'}`});
+      gY += HEADER;
+      layer.forEach((s,i)=>{
+        const c=i%cols, r=Math.floor(i/cols);
+        s.rectG = { x: MARGIN + c*(CELL+GAP), y: gY + r*(CELL+GAP), w:CELL, h:CELL };
+      });
+      gY += rows*(CELL+GAP) - GAP + SECTION_GAP;
+    });
+    const grouped = { w:gMaxWidth, h:gY-SECTION_GAP+MARGIN, sections:sectionsG };
+
+    const flatCols = Math.max(1, Math.ceil(Math.sqrt(list.length*1.35)));
+    const flatRows = Math.ceil(list.length/flatCols);
+    list.forEach((s,i)=>{
+      const c=i%flatCols, r=Math.floor(i/flatCols);
+      s.rectF = { x: MARGIN + c*(CELL+GAP), y: MARGIN + r*(CELL+GAP), w:CELL, h:CELL };
+    });
+    const flat = { w: MARGIN*2+flatCols*(CELL+GAP)-GAP, h: MARGIN*2+flatRows*(CELL+GAP)-GAP, sections:[] };
+
+    return { grouped, flat };
+  }
+
+  const LAYOUTS = { x: computeLayouts(xCanon), o: computeLayouts(oCanon), both: computeLayouts(bothCanon) };
+  const LISTS = { x: xCanon, o: oCanon, both: bothCanon };
+
+  let grouped = true, starter = 'x';
+  function activeList(){ return LISTS[starter]; }
+  function layoutFor(){ const L = LAYOUTS[starter]; return grouped ? L.grouped : L.flat; }
+  function rectOf(s){ return grouped ? s.rectG : s.rectF; }
+
+  /* ---------- 4. Render ---------- */
+
+  const canvas = document.getElementById('poster');
+  const ctx = canvas.getContext('2d');
+  const DPR = Math.min(devicePixelRatio||1, 2);
+  const MAX_RENDER_DPR = 3.5;
+  let renderDPR = DPR;
+
+  const PALETTES = {
+    codice: { paper:'#ece1c6', ink:'#2c2444', x:'#9a3324', o:'#2f5d8a', accent:'#a9762f', label:'#5b5270', font:"'Fraunces', serif", glowFilter:'none' },
+    reyes:  { paper:'#0d1635', ink:'#f3d854', x:'#ff4c4c', o:'#4c9aff', accent:'#f3d854', label:'#9db3d6', font:"'Source Code Pro', monospace", glowFilter:'drop-shadow(0 0 3px rgba(243,216,84,.45))' },
+    cosmos: { paper:'#12102a', ink:'#d9d3f0', x:'#e08a6b', o:'#7bc4d1', accent:'#e3c07a', label:'#9089b8', font:"'Fraunces', serif", glowFilter:'drop-shadow(0 0 3px rgba(217,211,240,.3))' },
+  };
+
+  document.querySelectorAll('#lookGroup button').forEach(btn=>{
+    const p = PALETTES[btn.dataset.value];
+    if(!p) return;
+    const sw = document.createElement('span');
+    sw.className = 'swatch';
+    sw.style.background = `linear-gradient(135deg, ${p.paper} 0 50%, ${p.x} 50% 75%, ${p.o} 75% 100%)`;
+    sw.style.boxShadow = `0 0 0 1px ${p.ink}55`;
+    btn.prepend(sw);
+  });
+
+  let currentLook='codice', colorMode='all', strokeMode='hand';
+
+  function renderPoster(){
+    const pal = PALETTES[currentLook];
+    const L = layoutFor();
+    const list = activeList();
+    canvas.width = L.w*renderDPR; canvas.height = L.h*renderDPR;
+    canvas.style.width = L.w+'px'; canvas.style.height = L.h+'px';
+    canvas.style.filter = pal.glowFilter;
+    ctx.setTransform(renderDPR,0,0,renderDPR,0,0);
+    ctx.clearRect(0,0,L.w,L.h);
+
+    if(L.sections.length){
+      ctx.font = `600 12px ${pal.font}`;
+      ctx.textBaseline='alphabetic';
+      L.sections.forEach(sec=>{
+        ctx.fillStyle=pal.label; ctx.globalAlpha=0.9;
+        ctx.fillText(currentLook==='reyes' ? sec.label.toUpperCase() : sec.label, MARGIN, sec.y+HEADER-12);
+        ctx.globalAlpha=1;
+      });
+    }
+    list.forEach(s => { const r=rectOf(s); drawBoardIcon(ctx, r.x, r.y, r.w, s, pal, colorMode, strokeMode); });
+    updateStatLine();
+  }
+
+  /* ---------- 5. Pan & zoom ---------- */
+
+  const world = document.getElementById('world');
+  const wrap = document.getElementById('canvasWrap');
+  let scale=1, tx=0, ty=0;
+
+  function applyTransform(){ wrap.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; }
+  function fitToScreen(){
+    const L = layoutFor();
+    const topReserve = innerWidth<=640 ? 176 : 132;
+    const vw = innerWidth, vh = innerHeight - topReserve;
+    scale = Math.min(vw/L.w, vh/L.h) * 0.94;
+    tx = (vw - L.w*scale)/2;
+    ty = topReserve + (vh - L.h*scale)/2;
+    applyTransform();
+    if(renderDPR !== DPR){ renderDPR = DPR; renderPoster(); }
+  }
+  document.getElementById('fitButton').addEventListener('click', fitToScreen);
+
+  let sharpenTimer = null;
+  function scheduleSharpen(){
+    clearTimeout(sharpenTimer);
+    sharpenTimer = setTimeout(()=>{
+      const desired = Math.min(MAX_RENDER_DPR, Math.max(DPR, DPR*scale));
+      if(Math.abs(desired-renderDPR)/renderDPR > 0.12){ renderDPR = desired; renderPoster(); }
+    }, 160);
+  }
+
+  let dragging=false, lastX=0, lastY=0, moved=0;
+  const activePointers = new Map(); // pointerId -> {x,y}
+  let pinchStartDist = 0, pinchStartScale = 1;
+
+  function pointersArray(){ return Array.from(activePointers.values()); }
+  function pinchDist(pts){ return Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y); }
+  function pinchCenter(pts){ return { x:(pts[0].x+pts[1].x)/2, y:(pts[0].y+pts[1].y)/2 }; }
+
+  world.addEventListener('pointerdown', e=>{
+    world.setPointerCapture(e.pointerId);
+    activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(activePointers.size===1){
+      dragging=true; moved=0; lastX=e.clientX; lastY=e.clientY;
+      world.classList.add('dragging');
+    } else if(activePointers.size===2){
+      dragging=false; moved=999; // a pinch is never a tap
+      const pts = pointersArray();
+      pinchStartDist = pinchDist(pts) || 1;
+      pinchStartScale = scale;
+    }
+  });
+  world.addEventListener('pointermove', e=>{
+    if(!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+
+    if(activePointers.size>=2){
+      const pts = pointersArray();
+      const rect = world.getBoundingClientRect();
+      const dist = pinchDist(pts) || 1;
+      const center = pinchCenter(pts);
+      const cx = center.x-rect.left, cy = center.y-rect.top;
+      const before = scale;
+      scale = Math.max(0.15, Math.min(4.5, pinchStartScale*(dist/pinchStartDist)));
+      tx = cx-(cx-tx)*(scale/before); ty = cy-(cy-ty)*(scale/before);
+      applyTransform();
+      scheduleSharpen();
+      return;
+    }
+    if(!dragging) return;
+    const dx=e.clientX-lastX, dy=e.clientY-lastY;
+    tx+=dx; ty+=dy; lastX=e.clientX; lastY=e.clientY;
+    moved += Math.abs(dx)+Math.abs(dy);
+    applyTransform();
+  });
+  function releasePointer(e){
+    activePointers.delete(e.pointerId);
+    if(activePointers.size===0){
+      dragging=false; world.classList.remove('dragging');
+      if(moved<6) handleTap(e.clientX, e.clientY);
+    } else if(activePointers.size===1){
+      // dropped to one finger — resume panning from here instead of jumping
+      const [remaining] = pointersArray();
+      dragging=true; moved=999; lastX=remaining.x; lastY=remaining.y;
+    }
+  }
+  world.addEventListener('pointerup', releasePointer);
+  world.addEventListener('pointercancel', releasePointer);
+  world.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const rect=world.getBoundingClientRect();
+    const mx=e.clientX-rect.left, my=e.clientY-rect.top, before=scale;
+    scale = Math.max(0.15, Math.min(4.5, scale*Math.exp(-e.deltaY*0.0012)));
+    tx = mx-(mx-tx)*(scale/before); ty = my-(my-ty)*(scale/before);
+    applyTransform();
+    scheduleSharpen();
+  }, {passive:false});
+
+  function handleTap(clientX, clientY){
+    const rect = world.getBoundingClientRect();
+    const x=(clientX-rect.left-tx)/scale, y=(clientY-rect.top-ty)/scale;
+    for(const s of activeList()){
+      const r=rectOf(s);
+      if(x>=r.x && x<=r.x+r.w && y>=r.y && y<=r.y+r.h){ showState(s); break; }
+    }
+  }
+
+  /* ---------- 6. Detail panel ---------- */
+
+  const panel = document.getElementById('panel');
+  const panelCanvas = document.getElementById('panelBoard');
+  const panelCtx = panelCanvas.getContext('2d');
+  const panelStatus = document.getElementById('panelStatus');
+  const panelMeta = document.getElementById('panelMeta');
+  const panelNote = document.getElementById('panelNote');
+  const panelId = document.getElementById('panelId');
+  document.getElementById('panelClose').addEventListener('click', ()=> panel.classList.remove('open'));
+
+  function outboundCount(s, xStarts){
+    if(s.isTerminal) return 0;
+    const seen=new Set();
+    const nextPlayer = xStarts ? (s.config.filter(v=>v===1).length===s.config.filter(v=>v===2).length?1:2)
+                                : (s.config.filter(v=>v===2).length===s.config.filter(v=>v===1).length?2:1);
+    for(let pos=0;pos<9;pos++){
+      if(s.config[pos]!==0) continue;
+      const child=s.config.slice(); child[pos]=nextPlayer;
+      seen.add(canonicalForm(child));
+    }
+    return seen.size;
+  }
+
+  function showState(s){
+    const pal = PALETTES[currentLook];
+    const size=220, DPR2=Math.min(devicePixelRatio||1,2);
+    panelCanvas.width=size*DPR2; panelCanvas.height=size*DPR2;
+    panelCanvas.style.filter = pal.glowFilter;
+    panelCtx.setTransform(DPR2,0,0,DPR2,0,0);
+    panelCtx.clearRect(0,0,size,size);
+    drawBoardIcon(panelCtx, size*0.06, size*0.06, size*0.88, s, pal, colorMode, strokeMode);
+
+    let status = `turno ${s.turnCount}/9`;
+    if(s.isTerminal) status = s.hasWinner ? `gana ${s.winners[0]===1?'X':'O'}` : 'empate';
+    panelStatus.textContent = status;
+
+    const who = s.inX && s.inO ? 'X y O' : (s.inX ? 'solo X' : 'solo O');
+    panelMeta.innerHTML =
+      `<b>simetrías</b> ${s.orbitSize} de 8<br>` +
+      `<b>ramifica a</b> ${outboundCount(s, starter!=='o')} estado(s)<br>` +
+      `<b>puede empezar</b> ${who}`;
+
+    if(s.turnCount===0){
+      panelNote.textContent = 'Tablero vacío — sin jugada previa.';
+    } else if(s.lastMoveCells.length<=1){
+      panelNote.textContent = 'La última jugada está marcada en color.';
+    } else {
+      panelNote.textContent = `${s.lastMoveCells.length} jugadas distintas pudieron ser la última en llegar aquí — se marcan todas, porque el tablero por sí solo no guarda el orden en que se jugó.`;
+    }
+    panelId.textContent = s.id;
+    panel.classList.add('open');
+  }
+
+  /* ---------- 7. Controls ---------- */
+
+  function wireGroup(id, onChange){
+    const el = document.getElementById(id);
+    el.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        el.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        onChange(btn.dataset.value);
+      });
+    });
+  }
+
+  function refreshOpenPanel(){
+    if(!panel.classList.contains('open')) return;
+    const openId = panelId.textContent;
+    const s = activeList().find(st => st.id===openId);
+    if(s) showState(s); else panel.classList.remove('open');
+  }
+
+  wireGroup('lookGroup', v=>{
+    currentLook = v;
+    document.documentElement.setAttribute('data-look', v);
+    renderPoster(); refreshOpenPanel();
+    try{ localStorage.setItem('cosmos-gato-look', v); }catch(e){}
+  });
+  wireGroup('strokeGroup', v=>{
+    strokeMode = v;
+    renderPoster(); refreshOpenPanel();
+  });
+  wireGroup('layoutGroup', v=>{
+    grouped = (v==='grouped');
+    renderPoster(); fitToScreen();
+  });
+  wireGroup('colorGroup', v=>{
+    colorMode = v;
+    renderPoster(); refreshOpenPanel();
+  });
+  wireGroup('starterGroup', v=>{
+    starter = v;
+    renderPoster(); fitToScreen();
+    panel.classList.remove('open');
+  });
+
+  const infoBackdrop = document.getElementById('infoBackdrop');
+  const settingsPanel = document.getElementById('settingsPanel');
+  function openInfo(){ infoBackdrop.classList.add('open'); }
+  function closeInfo(){ infoBackdrop.classList.remove('open'); }
+  function closeSettings(){ settingsPanel.classList.remove('open'); }
+  document.getElementById('infoBtn').addEventListener('click', openInfo);
+  document.getElementById('infoClose').addEventListener('click', closeInfo);
+  infoBackdrop.addEventListener('click', e=>{ if(e.target===infoBackdrop) closeInfo(); });
+  document.getElementById('settingsBtn').addEventListener('click', e=>{
+    e.stopPropagation();
+    settingsPanel.classList.toggle('open');
+  });
+  document.addEventListener('click', e=>{
+    if(settingsPanel.classList.contains('open') && !settingsPanel.contains(e.target) && e.target.id!=='settingsBtn'){
+      closeSettings();
+    }
+  });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeInfo(); closeSettings(); } });
+
+  try{
+    if(!localStorage.getItem('cosmos-gato-intro-seen')){
+      openInfo();
+      localStorage.setItem('cosmos-gato-intro-seen','1');
+    }
+  }catch(e){ openInfo(); }
+
+  try{
+    const stored = localStorage.getItem('cosmos-gato-look');
+    if(stored && PALETTES[stored]){
+      currentLook = stored;
+      document.querySelectorAll('#lookGroup button').forEach(b=>b.classList.toggle('active', b.dataset.value===stored));
+    }
+  }catch(e){}
+  document.documentElement.setAttribute('data-look', currentLook);
+
+  const starsEl = document.getElementById('stars');
+  for(let i=0;i<28;i++){
+    const s=document.createElement('i');
+    s.style.top=Math.random()*100+'%'; s.style.left=Math.random()*100+'%';
+    s.style.animationDelay=(Math.random()*2.6)+'s';
+    starsEl.appendChild(s);
+  }
+
+  /* ---------- 8. Stats & boot ---------- */
+
+  function winBreakdown(list){
+    const win1 = list.filter(s=>s.isTerminal && s.hasWinner && s.winners[0]===1).length;
+    const win2 = list.filter(s=>s.isTerminal && s.hasWinner && s.winners[0]===2).length;
+    const draw = list.filter(s=>s.isTerminal && !s.hasWinner).length;
+    return { win1, win2, draw, term: win1+win2+draw };
+  }
+
+  function renderExplainText(){
+    const xTerm = winBreakdown(xCanon);
+    document.getElementById('explainText').innerHTML =
+      `Existen <b>${(3**9).toLocaleString('es')}</b> formas de colocar X, O y espacios en un tablero de 3×3. ` +
+      `De esas, <b>${xCanon.rawCount.toLocaleString('es')}</b> son posiciones válidas en un juego con reglas estándar. ` +
+      `De esas, <b>${xCanon.length}</b> son únicas si consideras que siempre empieza el mismo jugador (por ejemplo X) — ` +
+      `o <b>${bothCanon.length}</b> si consideras que puede empezar cualquiera de los dos. ` +
+      `De los ${xCanon.length} estados únicos con X empezando, hay <b>${xTerm.term}</b> juegos finales distintos: ` +
+      `<b>${xTerm.win1}</b> los gana el jugador 1, <b>${xTerm.win2}</b> el jugador 2, y <b>${xTerm.draw}</b> terminan en empate.`;
+  }
+
+  function updateStatLine(){
+    const st = listStats(activeList());
+    const label = starter==='x' ? 'empieza X' : starter==='o' ? 'empieza O' : 'X ∪ O — el 000000000 y todo empate en curso cuentan una sola vez';
+    document.getElementById('statLine').textContent =
+      `${st.n} estados canónicos (${label}) · ${st.win} con ganador · ${st.draw} empates`;
+  }
+
+  renderExplainText();
+  renderPoster();
+  fitToScreen();
+  addEventListener('resize', fitToScreen);
+
+})();
+</script>
